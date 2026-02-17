@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Exploratory Visualization for Games-for-Health Research</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:     #F9F7F4;
+  --navy:   #0C1E35;
+  --blue:   #1A56DB;
+  --teal:   #0D9488;
+  --amber:  #D97706;
+  --rose:   #DC2626;
+  --green:  #16A34A;
+  --muted:  #64748B;
+  --rule:   #E2E8F0;
+  --card:   #FFFFFF;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  background: #1a1a2e;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Outfit', sans-serif;
+}
+
+.slide {
+  width: 1280px; height: 720px;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+
+.top-bar {
+  height: 5px;
+  background: linear-gradient(90deg,
+    var(--rose) 0%, var(--rose) 25%,
+    var(--blue) 25%, var(--blue) 50%,
+    var(--green) 50%, var(--green) 75%,
+    var(--amber) 75%, var(--amber) 100%);
+  flex-shrink: 0;
+}
+
+.header {
+  padding: 24px 52px 0;
+  flex-shrink: 0;
+}
+
+.main-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 44px; font-weight: 700; line-height: 1.12;
+  color: var(--navy);
+  opacity: 0; animation: slideUp .6s ease forwards .1s;
+}
+
+.header-rule {
+  height: 1px; background: var(--rule);
+  margin: 18px 52px 0;
+  opacity: 0; animation: fadeIn .4s ease forwards .3s;
+}
+
+.body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  padding: 16px 52px 0;
+  min-height: 0;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.04);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  cursor: default;
+  transition: transform .35s cubic-bezier(.34,1.56,.64,1),
+              box-shadow .3s ease;
+  opacity: 0;
+}
+.card:nth-child(1){ animation: cardIn .6s ease forwards .35s; }
+.card:nth-child(2){ animation: cardIn .6s ease forwards .5s; }
+.card:nth-child(3){ animation: cardIn .6s ease forwards .65s; }
+.card:nth-child(4){ animation: cardIn .6s ease forwards .8s; }
+.card:hover {
+  transform: translateY(-8px) scale(1.015);
+  box-shadow: 0 24px 56px rgba(0,0,0,.14);
+}
+
+.card-accent { height: 5px; flex-shrink: 0; }
+
+.card-illustration {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px 20px;
+}
+.card-illustration svg { width: 100%; height: 100%; }
+
+/* Colorful gradient backgrounds */
+.card:nth-child(1) .card-illustration { background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%); }
+.card:nth-child(2) .card-illustration { background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%); }
+.card:nth-child(3) .card-illustration { background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%); }
+.card:nth-child(4) .card-illustration { background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); }
+
+.card-text {
+  padding: 16px 18px 18px;
+  flex-shrink: 0;
+  display: flex; flex-direction: column; gap: 6px;
+  background: white;
+}
+
+.card-step {
+  font-size: 9.5px; font-weight: 700; letter-spacing: 3px;
+  text-transform: uppercase; opacity: .65;
+}
+.card-heading {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px; font-weight: 700; color: var(--navy);
+  line-height: 1.15;
+}
+
+.stats {
+  background: var(--navy);
+  display: grid; grid-template-columns: repeat(4,1fr);
+  margin-top: 16px;
+  position: relative; flex-shrink: 0;
+}
+.stats::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background: linear-gradient(90deg,
+    var(--rose), var(--blue), var(--green), var(--amber));
+}
+
+.stat {
+  padding: 16px 18px 18px;
+  text-align:center; position:relative;
+}
+.stat:not(:last-child)::after {
+  content:''; position:absolute; right:0; top:20%; bottom:20%;
+  width:1px; background:rgba(255,255,255,.08);
+}
+
+.stat-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 42px; font-weight: 700; line-height: 1;
+  opacity:0; animation: popIn .7s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+.stat:nth-child(1) .stat-num { color:#4ADE80; animation-delay:.95s; }
+.stat:nth-child(2) .stat-num { color:#60A5FA; animation-delay:1.08s; }
+.stat:nth-child(3) .stat-num { color:#FCD34D; animation-delay:1.21s; }
+.stat:nth-child(4) .stat-num { color:#F9A8D4; animation-delay:1.34s; }
+
+.stat-label {
+  font-size: 12px; font-weight: 600; color:#fff;
+  margin-top:5px;
+  opacity:0; animation: slideUp .4s ease forwards;
+}
+.stat:nth-child(1) .stat-label { animation-delay:1.0s; }
+.stat:nth-child(2) .stat-label { animation-delay:1.13s; }
+.stat:nth-child(3) .stat-label { animation-delay:1.26s; }
+.stat:nth-child(4) .stat-label { animation-delay:1.39s; }
+
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(14px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes fadeIn  { from{opacity:0} to{opacity:1} }
+@keyframes cardIn {
+  from { opacity:0; transform:translateY(24px) scale(.96); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+@keyframes popIn {
+  from { opacity:0; transform:scale(.55); }
+  to   { opacity:1; transform:scale(1); }
+}
+@keyframes float {
+  0%,100%{ transform:translateY(0); }
+  50%    { transform:translateY(-10px); }
+}
+@keyframes glow {
+  0%,100%{ filter:drop-shadow(0 0 12px #F59E0B); }
+  50%    { filter:drop-shadow(0 0 28px #D97706); }
+}
+@keyframes pulse {
+  0%,100%{ opacity:1; transform:scale(1); }
+  50%    { opacity:.7; transform:scale(1.05); }
+}
+</style>
+</head>
+<body>
+<div class="slide">
+
+  <div class="top-bar"></div>
+
+  <header class="header">
+    <h1 class="main-title">
+      Exploratory Visualization for Games-for-Health Research
+    </h1>
+  </header>
+  <div class="header-rule"></div>
+
+  <div class="body">
+
+    <!-- CARD 1 -->
+    <div class="card">
+      <div class="card-accent" style="background:#DC2626;"></div>
+      <div class="card-illustration">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <g style="animation:float 3s ease-in-out infinite">
+            <rect x="55" y="65" width="90" height="110" rx="5" fill="#B91C1C" opacity=".3"/>
+            <rect x="50" y="55" width="90" height="110" rx="5" fill="#DC2626" opacity=".5"/>
+            <rect x="45" y="45" width="90" height="110" rx="5" fill="#EF4444" stroke="#B91C1C" stroke-width="2"/>
+            <line x1="60" y1="70" x2="120" y2="70" stroke="#7F1D1D" stroke-width="2.5" opacity=".5"/>
+            <line x1="60" y1="85" x2="115" y2="85" stroke="#7F1D1D" stroke-width="2.5" opacity=".5"/>
+            <line x1="60" y1="100" x2="118" y2="100" stroke="#7F1D1D" stroke-width="2.5" opacity=".5"/>
+            <line x1="60" y1="115" x2="112" y2="115" stroke="#7F1D1D" stroke-width="2.5" opacity=".5"/>
+          </g>
+          <text x="25" y="90" font-family="Georgia" font-size="48" font-weight="bold" 
+                fill="#B91C1C" style="animation:float 2.5s ease-in-out infinite .5s">?</text>
+          <text x="145" y="75" font-family="Georgia" font-size="42" font-weight="bold" 
+                fill="#DC2626" style="animation:float 2.8s ease-in-out infinite 1s">?</text>
+          <g transform="translate(100, 145)">
+            <circle cx="0" cy="0" r="22" fill="none" stroke="#1F2937" stroke-width="5"/>
+            <line x1="16" y1="16" x2="35" y2="35" stroke="#1F2937" stroke-width="6" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </div>
+      <div class="card-text">
+        <span class="card-step" style="color:#DC2626;">01 · Problem</span>
+        <h2 class="card-heading">Lost in reading papers</h2>
+      </div>
+    </div>
+
+    <!-- CARD 2 -->
+    <div class="card">
+      <div class="card-accent" style="background:#1A56DB;"></div>
+      <div class="card-illustration">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <g>
+            <rect x="15" y="35" width="32" height="24" rx="3" fill="#1E3A8A"/>
+            <rect x="51" y="35" width="32" height="24" rx="3" fill="#1D4ED8"/>
+            <rect x="87" y="35" width="32" height="24" rx="3" fill="#3B82F6"/>
+            <rect x="123" y="35" width="32" height="24" rx="3" fill="#93C5FD"/>
+            <rect x="159" y="35" width="32" height="24" rx="3" fill="#DBEAFE"/>
+            <rect x="15" y="63" width="32" height="24" rx="3" fill="#581C87" 
+                  style="animation:pulse 2s ease-in-out infinite"/>
+            <rect x="51" y="63" width="32" height="24" rx="3" fill="#7C3AED"/>
+            <rect x="87" y="63" width="32" height="24" rx="3" fill="#A78BFA"/>
+            <rect x="123" y="63" width="32" height="24" rx="3" fill="#C4B5FD"/>
+            <rect x="159" y="63" width="32" height="24" rx="3" fill="#EDE9FE"/>
+            <rect x="13" y="61" width="36" height="28" rx="4" fill="none" 
+                  stroke="#DC2626" stroke-width="4" style="animation:pulse 1.5s ease-in-out infinite"/>
+            <rect x="15" y="91" width="32" height="24" rx="3" fill="#065F46"/>
+            <rect x="51" y="91" width="32" height="24" rx="3" fill="#059669"/>
+            <rect x="87" y="91" width="32" height="24" rx="3" fill="#34D399"/>
+            <rect x="123" y="91" width="32" height="24" rx="3" fill="#A7F3D0"/>
+            <rect x="159" y="91" width="32" height="24" rx="3" fill="#D1FAE5"/>
+            <rect x="15" y="119" width="32" height="24" rx="3" fill="#92400E"/>
+            <rect x="51" y="119" width="32" height="24" rx="3" fill="#D97706"/>
+            <rect x="87" y="119" width="32" height="24" rx="3" fill="#FBBF24"/>
+            <rect x="123" y="119" width="32" height="24" rx="3" fill="#FDE68A"/>
+            <rect x="159" y="119" width="32" height="24" rx="3" fill="#FEF3C7"/>
+            <rect x="15" y="147" width="32" height="24" rx="3" fill="#0E7490"/>
+            <rect x="51" y="147" width="32" height="24" rx="3" fill="#06B6D4"/>
+            <rect x="87" y="147" width="32" height="24" rx="3" fill="#67E8F9"/>
+            <rect x="123" y="147" width="32" height="24" rx="3" fill="#CFFAFE"/>
+            <rect x="159" y="147" width="32" height="24" rx="3" fill="#ECFEFF"/>
+          </g>
+          <g transform="translate(165, 15)">
+            <path d="M0,0 L0,18 L5,13 L9,20 L12,19 L8,12 L14,12 Z" 
+                  fill="#1F2937" stroke="#0F172A" stroke-width="1.5"/>
+          </g>
+        </svg>
+      </div>
+      <div class="card-text">
+        <span class="card-step" style="color:#1A56DB;">02 · Platform</span>
+        <h2 class="card-heading">Interactive heatmaps</h2>
+      </div>
+    </div>
+
+    <!-- CARD 3 -->
+    <div class="card">
+      <div class="card-accent" style="background:#16A34A;"></div>
+      <div class="card-illustration">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- Speedometer moved much lower -->
+          <g transform="translate(100, 150)">
+            <circle cx="0" cy="0" r="70" fill="none" stroke="#D1FAE5" stroke-width="12"/>
+            <defs>
+              <linearGradient id="speedGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#FCD34D"/>
+                <stop offset="40%" style="stop-color:#4ADE80"/>
+                <stop offset="100%" style="stop-color:#16A34A"/>
+              </linearGradient>
+            </defs>
+            <path d="M -70,0 A 70,70 0 1 1 70,0" 
+                  stroke="url(#speedGrad)" stroke-width="14" fill="none" stroke-linecap="round"/>
+            <line x1="-70" y1="0" x2="-58" y2="0" stroke="#047857" stroke-width="3"/>
+            <line x1="70" y1="0" x2="58" y2="0" stroke="#047857" stroke-width="3"/>
+            <line x1="0" y1="0" x2="52" y2="-35" 
+                  stroke="#DC2626" stroke-width="6" stroke-linecap="round"/>
+            <circle cx="0" cy="0" r="12" fill="#1F2937"/>
+            <circle cx="0" cy="0" r="6" fill="#DC2626"/>
+          </g>
+          <!-- Text moved much higher to create large gap -->
+          <text x="100" y="45" font-family="Cormorant Garamond" font-size="50" 
+                font-weight="bold" fill="#15803D" text-anchor="middle">6-12×</text>
+        </svg>
+      </div>
+      <div class="card-text">
+        <span class="card-step" style="color:#16A34A;">03 · Speed</span>
+        <h2 class="card-heading">6–12× faster</h2>
+      </div>
+    </div>
+
+    <!-- CARD 4 -->
+    <div class="card">
+      <div class="card-accent" style="background:#D97706;"></div>
+      <div class="card-illustration">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- Universal Accessibility Symbol (wheelchair icon) -->
+          <g transform="translate(100, 85)">
+            <!-- Circle background -->
+            <circle cx="0" cy="0" r="50" fill="#D97706"/>
+            <circle cx="0" cy="0" r="42" fill="#FCD34D"/>
+            
+            <!-- Wheelchair person icon -->
+            <!-- Head -->
+            <circle cx="-8" cy="-15" r="8" fill="#D97706"/>
+            
+            <!-- Body/torso -->
+            <path d="M -8,-7 L -8,8" stroke="#D97706" stroke-width="5" stroke-linecap="round"/>
+            
+            <!-- Arms -->
+            <path d="M -8,0 L -18,5" stroke="#D97706" stroke-width="4" stroke-linecap="round"/>
+            <path d="M -8,0 L 2,-2" stroke="#D97706" stroke-width="4" stroke-linecap="round"/>
+            
+            <!-- Wheelchair wheel (large) -->
+            <circle cx="0" cy="15" r="20" fill="none" stroke="#D97706" stroke-width="5"/>
+            <circle cx="0" cy="15" r="14" fill="none" stroke="#D97706" stroke-width="2"/>
+            <!-- Spokes -->
+            <line x1="0" y1="15" x2="0" y2="-5" stroke="#D97706" stroke-width="2"/>
+            <line x1="0" y1="15" x2="14" y2="25" stroke="#D97706" stroke-width="2"/>
+            <line x1="0" y1="15" x2="-14" y2="25" stroke="#D97706" stroke-width="2"/>
+            
+            <!-- Small front wheel -->
+            <circle cx="18" cy="28" r="6" fill="none" stroke="#D97706" stroke-width="3"/>
+            
+            <!-- Frame connecting to wheel -->
+            <path d="M -8,8 L 0,15" stroke="#D97706" stroke-width="4" stroke-linecap="round"/>
+          </g>
+          
+          <!-- Three feature icons - well spaced horizontally -->
+          <!-- KEYBOARD - Left -->
+          <g transform="translate(40, 155)">
+            <rect x="0" y="0" width="28" height="20" rx="3" fill="#D97706" stroke="#92400E" stroke-width="2"/>
+            <!-- Keys -->
+            <rect x="3" y="3" width="5" height="5" rx="1" fill="#FEF3C7"/>
+            <rect x="10" y="3" width="5" height="5" rx="1" fill="#FEF3C7"/>
+            <rect x="17" y="3" width="5" height="5" rx="1" fill="#FEF3C7"/>
+            <rect x="24" y="3" width="2" height="5" rx="1" fill="#FEF3C7"/>
+            <rect x="3" y="10" width="6" height="5" rx="1" fill="#FEF3C7"/>
+            <rect x="11" y="10" width="6" height="5" rx="1" fill="#FEF3C7"/>
+            <rect x="19" y="10" width="6" height="5" rx="1" fill="#FEF3C7"/>
+            <rect x="5" y="16" width="18" height="2" rx="1" fill="#FEF3C7"/>
+            <!-- Label below -->
+            <text x="14" y="32" font-family="Outfit" font-size="9" 
+                  font-weight="600" fill="#78350F" text-anchor="middle">Keyboard</text>
+          </g>
+          
+          <!-- VISUAL (Eye) - Center -->
+          <g transform="translate(100, 160)">
+            <ellipse cx="0" cy="0" rx="16" ry="11" fill="none" stroke="#D97706" stroke-width="4"/>
+            <circle cx="0" cy="0" r="6" fill="#D97706"/>
+            <circle cx="0" cy="0" r="3" fill="#FEF3C7"/>
+            <!-- Label below -->
+            <text x="0" y="27" font-family="Outfit" font-size="9" 
+                  font-weight="600" fill="#78350F" text-anchor="middle">Visual</text>
+          </g>
+          
+          <!-- AUDIO (Sound waves) - Right -->
+          <g transform="translate(160, 160)">
+            <circle cx="0" cy="0" r="4" fill="#D97706"/>
+            <!-- Sound waves -->
+            <path d="M 7,0 Q 11,-8 15,-8" stroke="#D97706" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M 7,0 Q 11,0 15,0" stroke="#D97706" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M 7,0 Q 11,8 15,8" stroke="#D97706" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M 18,0 Q 24,-12 30,-12" stroke="#EA580C" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M 18,0 Q 24,0 30,0" stroke="#EA580C" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M 18,0 Q 24,12 30,12" stroke="#EA580C" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <!-- Label below -->
+            <text x="0" y="27" font-family="Outfit" font-size="9" 
+                  font-weight="600" fill="#78350F" text-anchor="middle">Audio</text>
+          </g>
+        </svg>
+      </div>
+      <div class="card-text">
+        <span class="card-step" style="color:#D97706;">04 · Accessibility</span>
+        <h2 class="card-heading">Fully accessible design</h2>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num">6–12×</div>
+      <div class="stat-label">Faster</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">82%</div>
+      <div class="stat-label">Preferred Heatmaps</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Success Rate</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">215</div>
+      <div class="stat-label">Papers</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
